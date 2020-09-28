@@ -1,0 +1,234 @@
+<section data-section-id="{{ section.id }}" data-section-type="usc-reviewsio" data-section-settings='{{ section_settings }}'>
+<div class="container">
+  {%- if section.settings.title != blank -%}
+  <h2 class="heading h1">{{ section.settings.title | escape }}</h2>
+  {%- endif -%}
+  <div class="companyCarousel">
+  <div class="carouselheader">
+  <div class="companyGrade"></div><div class="avgAndTotal"></div>
+  
+  
+  </div>
+  <div class="carouselSlider">
+    <button class="prev">
+    {%- render 'icon', icon: 'arrow-left' -%}
+    </button>
+     <div class="reviews">
+    </div>
+    <button class="next">
+    {%- render 'icon', icon: 'arrow-right' -%}
+    </button>
+   
+
+  </div>
+  </div>
+  </div>
+</section>
+<style>
+  .companyCarousel {
+   width:100%;
+   padding:20px 0 20px 0;
+  }
+  .carouselheader {
+   text-align:center;
+   padding: 15px 150px 18px 15px;
+   width:100%;
+   margin: 0 auto;
+   max-width: 768px;
+   box-shadow:0 1px 0 rgba(0,0,0,.05), 0 5px 1px -3px rgba(0,0,0,.05);
+  }
+  .companyGrade {
+   display:inline-block;
+   width:270px;
+   float:left;
+  }
+  .avgAndTotal {
+   display:inline-block;
+   width:290px;
+    
+  }
+  .reviews {
+   display:inline-block; 
+   width:100%;
+  }
+  .reviews div {
+   display:none; 
+  }
+  .reviews div.revActive {
+   display:block; 
+   padding-right:15px;
+   padding-left:15px;
+   display:inline-block;
+   width:25%;
+   white-space:normal;
+  }
+  .carouselSlider button {
+   display:inline-block;
+   position:absolute;
+  }
+</style>
+<script>
+  $(document).ready(function(){
+    const proxyurl = "https://cors-anywhere.herokuapp.com/";
+    //console.log(encoded)
+  $.ajax({
+    method: 'GET',
+    {% if section.settings.rating_setting != blank %}
+    url: proxyurl+"https://api.reviews.io/merchant/reviews?store=univarsc-com&min_rating=4",
+    {% else %}
+    url: proxyurl+"https://api.reviews.io/merchant/reviews?store=univarsc-com",
+    {% endif %}
+     headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer' 
+  },
+    success: function (result){
+      var resultString = JSON.stringify(result);
+      var parsedResult = JSON.parse(resultString);
+      var companyStats = parsedResult.stats;
+      var companyGrade = parsedResult.word;
+      
+      var aRng;
+      var tR;
+      
+      var reviews = parsedResult.reviews;
+      
+      console.log(parsedResult, companyGrade);
+	  $.each(companyStats, function( key, value ) {
+      if(key == "total_reviews"){
+       tR = value;
+      }
+      else{
+       aRng = value;
+      }
+     });
+     $(".companyGrade").append("<span>"+companyGrade+"</span>");
+     $(".avgAndTotal").append("<span>"+aRng+" Average </span><span>"+tR+" Total Reviews</span>");
+      for(var i = 0; i < reviews.length; i++){
+        if(i <= 3){
+       
+        $('.reviews').append("<div class='revActive'><p class='author'>"+ reviews[i].reviewer.first_name + reviews[i].reviewer.last_name + "</p>" +  reviews[i].rating + reviews[i].comments + "</div>");
+      }
+       if(i > 3){
+        $('.reviews').append("<div><p class='author'>"+ reviews[i].reviewer.first_name + reviews[i].reviewer.last_name + "</p>" +  reviews[i].rating + reviews[i].comments + "</div>");
+
+       }
+      }
+      
+   },
+    error: function (error){
+     console.log(error + "Error"); 
+    }
+  });
+ });
+  $(function(){
+  
+  $('.next').click(function(){
+   var totalRevEl = $('.reviews').children();
+   var totalRevActiveEl = $('.reviews').children("div.revActive");
+   var totalRevActiveElLength = totalRevActiveEl.length;
+    for(var i = 0; i < totalRevActiveEl.length; i++){
+     totalRevActiveEl.removeClass('revActive'); 
+    }
+    for(var i = totalRevActiveElLength; i < totalRevActiveElLength + 4; i++){
+     var fourReviewsAfter = $('.reviews').children()[i];
+     fourReviewsAfter.className = "revActive";
+    }
+  });
+  $('.prev').click(function(){
+    $('.reviews').find('div.revActive').prev().addClass('revActive');
+    $('.reviews').find('div.revActive').next().removeClass('revActive');
+
+  });
+  })
+</script>
+{% comment %}
+Get Latest Merchant Reviews
+<script>
+  $(document).ready(function(){
+    const proxyurl = "https://cors-anywhere.herokuapp.com/";
+  $.ajax({
+    method: 'GET',
+    url: proxyurl+"https://api.reviews.io/merchant/latest?store=univarsc-com",
+     headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer' 
+  },
+    success: function (result){
+      var resultString = JSON.stringify(result);
+      var parsedResult = JSON.parse(resultString);
+      //console.log(parsedResult);
+      var objectsT = parsedResult.objects;
+      var companyStats = parsedResult.stats;
+      var companyGrade = parsedResult.word;
+	$.each(companyStats, function( key, value ) {
+      var tR = value.total_reviews;
+      var aRng = value.average_rating;
+     })
+   },
+    error: function (error){
+     console.log(error + "Error"); 
+    }
+  })
+ })
+</script>
+{% endcomment %}
+{% schema %}
+  {
+    "name": "USC Reviews",
+  
+  
+        "settings": [
+          {
+            "type": "header",
+            "content": "Image"
+          },
+          
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Heading",
+			"info": "4-6 words maximum"
+          },
+		  {
+            "type": "header",
+            "content": "Carousel Settings"
+          },
+          {
+            "type": "checkbox",
+            "id": "rating_setting",
+            "label": "Only show 4 star and 5 star reviews",
+			"info": "Only Show 4 star and 5 star reviews"
+          },
+ 	      {
+			"type": "select",
+			"id": "reviews_to_show",
+            "label": "Number Of Reviews to show",
+      		"options": [
+       		 {
+          		"value": "4",
+          		"label": "Show 4 reviews every slide"
+        	 },
+        	 {	
+          		"value": "5",
+          		"label": "Show 4 reviews every slide"
+        	 }
+     	   ],
+      			"default": "4"
+		  }
+	     ],
+   "presets": [
+    {
+      "name": {
+        "en": "Reviews"
+      },
+      "category": {
+        "en": "Scripts"
+      }
+    }
+  ]
+	}
+ 
+  
+{% endschema %}
+
