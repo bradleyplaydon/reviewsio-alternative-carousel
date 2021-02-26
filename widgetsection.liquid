@@ -1,4 +1,4 @@
-<section data-section-id="{{ section.id }}" data-section-type="usc-reviewsio" data-section-settings='{{ section_settings }}'>
+<section data-section-id="{{ section.id }}" data-section-type="reviewsio" data-section-settings='{{ section_settings }}'>
 <div class="container">
   {%- if section.settings.title != blank -%}
   <h2 class="heading h1">{{ section.settings.title | escape }}</h2>
@@ -74,9 +74,9 @@
   $.ajax({
     method: 'GET',
     {% if section.settings.rating_setting != blank %}
-    url: proxyurl+"https://api.reviews.io/merchant/reviews?store=univarsc-com&min_rating=4",
+    url: proxyurl+"https://api.reviews.io/merchant/reviews?store="YOUR_STORE"-com&min_rating=4",
     {% else %}
-    url: proxyurl+"https://api.reviews.io/merchant/reviews?store=univarsc-com",
+    url: proxyurl+"https://api.reviews.io/merchant/reviews?store=YOUR_STORE",
     {% endif %}
      headers: {
     'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ Get Latest Merchant Reviews
     const proxyurl = "https://cors-anywhere.herokuapp.com/";
   $.ajax({
     method: 'GET',
-    url: proxyurl+"https://api.reviews.io/merchant/latest?store=univarsc-com",
+    url: proxyurl+"https://api.reviews.io/merchant/latest?store=YOUR_STORE",
      headers: {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer' 
@@ -175,7 +175,7 @@ Get Latest Merchant Reviews
 {% endcomment %}
 {% schema %}
   {
-    "name": "USC Reviews",
+    "name": "Reviews",
   
   
         "settings": [
